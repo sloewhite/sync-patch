@@ -20,6 +20,7 @@ ReVanced patches for **Sync for Reddit** / **Sync for Reddit Pro** `v23.06.30-13
 
    It always points at the newest release. `bundles/latest.json` also includes pre-releases. Alternatively download the `.rvp` from [Releases](https://github.com/sloewhite/sync-patch/releases) and add it as a local file.
 2. Patch **Sync for Reddit** `v23.06.30-13:39`, selecting the official ReVanced bundle's **Spoof client** patch (Sync cannot reach Reddit without it) and the patches from this bundle.
+   **Turn off the official bundle's "Fix Redgifs API" patch.** It changes the same code as "Fix Redgifs API (sync-patch)", and the two cannot be used together. The Manager only lets you change the patch selection if you enable the setting for it (in the Manager's settings, under the advanced options; it is called "Allow changing patch selection" or similar, depending on the version).
 
 The release workflow publishes the `.rvp` and updates `bundles/*.json` when a `v*` tag is pushed. Tags with a hyphen (`v0.2.0-dev.1`) are pre-releases.
 
