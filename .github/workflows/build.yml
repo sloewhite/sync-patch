@@ -17,6 +17,8 @@ jobs:
       # Reading the ReVanced registry needs a token with read:packages. If the default token is refused, create
       # a classic PAT with only read:packages and store it as the repository secret GPR_TOKEN.
       GITHUB_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
+      ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ github.actor }}
+      ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
       IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
