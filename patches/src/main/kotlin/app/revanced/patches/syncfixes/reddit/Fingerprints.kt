@@ -10,7 +10,7 @@ private const val MORE_REQUEST_SOURCE = "OAuthCommentsMoreRequest.java"
 
 /** OAuthGalleryRequest's static URL builder (also the key Sync reads its gallery cache with). */
 internal val galleryUrlFingerprint = fingerprint {
-    accessFlags(AccessFlags.STATIC)
+    accessFlags(AccessFlags.PUBLIC, AccessFlags.STATIC)
     returns(STRING)
     parameters(STRING)
     strings("https://oauth.reddit.com/api/info.json?id=t3_")

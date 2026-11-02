@@ -57,7 +57,7 @@ jobs:
 
       - name: List patches
         shell: bash
-        run: java -jar revanced-cli.jar list-patches --with-packages --with-versions patches/build/libs/*.rvp 2>&1 | tee list.txt || true
+        run: java -jar revanced-cli.jar list-patches --packages --versions --options -b -p patches/build/libs/*.rvp 2>&1 | tee list.txt || true
 
       - name: Apply patches
         shell: bash
