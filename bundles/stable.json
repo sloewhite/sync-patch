@@ -1,7 +1,7 @@
 {
-    "created_at":  "2026-11-02T11:40:36",
-    "description":  "Fixes for Sync for Reddit v23.06.30-13:39 (free and Pro): Reddit galleries, \"load more comments\" and Redgifs.\n\nPatch together with the official ReVanced bundle\u0027s **Spoof client** patch: Sync cannot reach Reddit without it.",
-    "download_url":  "https://github.com/sloewhite/sync-patch/releases/download/v0.1.0/patches-0.1.0.rvp",
-    "signature_download_url":  "N/A",
-    "version":  "v0.1.0"
+  "created_at": "2026-11-02T11:53:44",
+  "description": "Fixes for Sync for Reddit v23.06.30-13:39 (free and Pro): Reddit galleries, \"load more comments\" and Redgifs.\n\nPatch together with the official ReVanced bundle's **Spoof client** patch: Sync cannot reach Reddit without it.\n",
+  "download_url": "https://github.com/sloewhite/sync-patch/releases/download/v0.1.1/patches-0.1.1.rvp",
+  "signature_download_url": "N/A",
+  "version": "v0.1.1"
 }
