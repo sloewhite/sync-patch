@@ -28,6 +28,43 @@ jobs:
           chmod +x gradlew
           ./gradlew buildAndroid --stacktrace
       - name: Publish release
-        run: gh release create "$GITHUB_REF_NAME" patches/build/libs/*.rvp --title "$GITHUB_REF_NAME" --generate-notes
+        run: |
+          FILE=$(ls patches/build/libs/*.rvp | head -n1)
+          cat > notes.md <<'NOTES'
+          Fixes for Sync for Reddit v23.06.30-13:39 (free and Pro): Reddit galleries, "load more comments" and Redgifs.
+
+          Patch together with the official ReVanced bundle's **Spoof client** patch: Sync cannot reach Reddit without it.
+          NOTES
+          FLAGS=()
+          # A tag with a hyphen (v0.2.0-dev.1) is published as a pre-release.
+          case "$GITHUB_REF_NAME" in *-*) FLAGS+=(--prerelease) ;; esac
+          gh release create "$GITHUB_REF_NAME" "$FILE" --title "$GITHUB_REF_NAME" --notes-file notes.md "${FLAGS[@]}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # ReVanced Manager adds a remote source from a small JSON file that points at the .rvp, not from the .rvp
+      # itself. Write it to bundles/ on main:
+      #   stable.json  newest regular release     latest.json  newest release, pre-releases included
+      #   dev.json     newest pre-release
+      - name: Update bundle JSON on main
+        run: |
+          FILE=$(basename "$(ls patches/build/libs/*.rvp | head -n1)")
+          gh release view "$GITHUB_REF_NAME" --json body,publishedAt,isPrerelease > release.json
+          jq --arg url "https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/$FILE" \
+             --arg version "$GITHUB_REF_NAME" \
+             '{created_at: (.publishedAt | rtrimstr("Z")), description: .body, download_url: $url, signature_download_url: "N/A", version: $version}' \
+             release.json > bundle.json
+          PRE=$(jq -r .isPrerelease release.json)
+
+          git fetch origin main
+          git checkout -f main
+          mkdir -p bundles
+          cp bundle.json bundles/latest.json
+          if [ "$PRE" = "true" ]; then cp bundle.json bundles/dev.json; else cp bundle.json bundles/stable.json; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bundles
+          git commit -m "chore: update bundle JSON for $GITHUB_REF_NAME" || exit 0
+          git push origin main
         env:
           GH_TOKEN: ${{ github.token }}
