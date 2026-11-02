@@ -10,8 +10,8 @@ internal val SYNC_COMPATIBILITY = arrayOf(
     "com.laurencedawson.reddit_sync.pro" to setOf(SYNC_VERSION),
 )
 
-internal const val EXTENSION = "extensions/syncforreddit.rve"
-internal const val EXTENSION_PACKAGE = "Lapp/revanced/extension/syncforreddit"
+internal const val EXTENSION = "extensions/syncfixes.rve"
+internal const val EXTENSION_PACKAGE = "Lapp/revanced/extension/syncfixes"
 
 internal const val STRING = "Ljava/lang/String;"
 internal const val NETWORK_RESPONSE = "Lcom/android/volley/NetworkResponse;"

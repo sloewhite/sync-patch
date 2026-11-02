@@ -3,7 +3,7 @@
  * with follow-ups from pdscomp, built on wchill/patcheddit's FixRedgifsApiPatch
  * (https://github.com/wchill/patcheddit), GPLv3.
  */
-package app.revanced.extension.syncforreddit;
+package app.revanced.extension.syncfixes;
 
 import android.util.Log;
 

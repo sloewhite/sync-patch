@@ -1,4 +1,4 @@
-package app.revanced.extension.syncforreddit;
+package app.revanced.extension.syncfixes;
 
 import com.android.volley.NetworkResponse;
 

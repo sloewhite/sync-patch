@@ -1,9 +1,9 @@
 extension {
-    name = "extensions/syncforreddit.rve"
+    name = "extensions/syncfixes.rve"
 }
 
 android {
-    namespace = "app.revanced.extension.syncforreddit"
+    namespace = "app.revanced.extension.syncfixes"
 
     defaultConfig {
         minSdk = 23

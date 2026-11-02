@@ -8,7 +8,7 @@ ReVanced patches for **Sync for Reddit** / **Sync for Reddit Pro** `v23.06.30-13
 |-------|-------|
 | Fix Reddit galleries | `/api/info` is blocked; the post is loaded from `/comments` instead |
 | Fix load more comments | `/api/morechildren` is blocked; comments are loaded from `/comments` instead |
-| Fix Redgifs API | removed Redgifs endpoints answered locally, temporary token, id parsing |
+| Fix Redgifs API (sync-patch) | removed Redgifs endpoints answered locally, temporary token, id parsing |
 
 ## Use with ReVanced Manager
 

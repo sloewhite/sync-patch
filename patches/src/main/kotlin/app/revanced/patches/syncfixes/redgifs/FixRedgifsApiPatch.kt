@@ -50,10 +50,10 @@ private val getGfycatIdFingerprint = fingerprint {
 
 @Suppress("unused")
 val fixRedgifsApiPatch = bytecodePatch(
-    name = "Fix Redgifs API",
+    name = "Fix Redgifs API (sync-patch)",
     description = "Fixes \"Error connecting to Redgifs\": answers the Redgifs endpoints Sync relies on that " +
         "were removed, uses Redgifs' temporary token, and fixes video ids taken from links like " +
-        "redgifs.com/watch/{id}/?92. Turn off Patcheddit's \"Fix Redgifs API\" when using this one: " +
+        "redgifs.com/watch/{id}/?92. Turn off any other bundle's Redgifs fix for Sync (such as the official \"Fix Redgifs API\"): " +
         "both change the same code.",
 ) {
     compatibleWith(*SYNC_COMPATIBILITY)
