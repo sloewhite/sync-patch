@@ -16,4 +16,4 @@ Use alongside Patcheddit's **Spoof client** (own client ID). Turn off Patcheddit
 ## Build
 JDK 17+, Android SDK (platform 36), GitHub token with `read:packages`
 (`GITHUB_ACTOR` / `GITHUB_TOKEN` or `gpr.user` / `gpr.key`), then `./gradlew buildAndroid`.
-Output: `patches/build/libs/patches-<version>.rvp`. Replace `OWNER` in `patches/build.gradle.kts`.
+Output: `patches/build/libs/patches-<version>.rvp`. The patch metadata in `patches/build.gradle.kts` points to this repository.
