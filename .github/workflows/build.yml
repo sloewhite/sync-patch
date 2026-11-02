@@ -56,13 +56,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: List patches
-        run: java -jar revanced-cli.jar list-patches --with-packages --with-versions patches/build/libs/*.rvp | tee list.txt
+        shell: bash
+        run: java -jar revanced-cli.jar list-patches --with-packages --with-versions patches/build/libs/*.rvp 2>&1 | tee list.txt || true
 
       - name: Apply patches
+        shell: bash
         run: |
-          DISABLE=""
-          if [ -z "$IMGUR_CLIENT_ID" ]; then DISABLE='-d "Fix imgur thumbnails"'; fi
-          eval java -jar revanced-cli.jar patch -p patches/build/libs/*.rvp $DISABLE -o sync-patched.apk sync.apk 2>&1 | tee patch.log
+          ARGS=()
+          if [ -z "$IMGUR_CLIENT_ID" ]; then ARGS+=(-d "Fix imgur thumbnails"); fi
+          # -b: our .rvp is unsigned, so the CLI's signature/provenance check has to be bypassed.
+          java -jar revanced-cli.jar patch -p patches/build/libs/*.rvp -b "${ARGS[@]}" -o sync-patched.apk sync.apk 2>&1 | tee patch.log
+          test -f sync-patched.apk
 
       - uses: actions/upload-artifact@v4
         if: always()
