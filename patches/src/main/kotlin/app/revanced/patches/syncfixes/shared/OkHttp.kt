@@ -1,20 +1,18 @@
 package app.revanced.patches.syncfixes.shared
 
 import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.patch.BytecodePatchContext
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.util.proxy.mutableTypes.MutableMethod
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal const val OKHTTP_CLIENT = "Lokhttp3/OkHttpClient;"
-internal const val OKHTTP_CLIENT_BUILDER = "Lokhttp3/OkHttpClient\$Builder;"
 
 /** True if this is a call to a static, no-argument method returning the OkHttp client. */
 internal fun Instruction.isClientGetterCall(): Boolean {
@@ -28,8 +26,9 @@ internal fun Instruction.fieldReference() =
 
 /**
  * Follows the OkHttpHelper client getter called from [caller] to the static field it returns, then to the
- * `builder.build()` whose result is stored in that field, and replaces that call with [installHook], a static
- * `(OkHttpClient.Builder) -> OkHttpClient` in the extension.
+ * method that stores the client in that field, and wraps the stored value with [installHook], a static
+ * `(OkHttpClient) -> OkHttpClient` in the extension. Working on the stored value (not on a `builder.build()` call) keeps
+ * it working when another patch has already changed how the client is built.
  *
  * Sync's OkHttpHelper has several clients (Volley uses one, Glide another), so each is reached through
  * whoever uses it instead of by obfuscated name.
@@ -56,20 +55,13 @@ internal fun BytecodePatchContext.hookClientBuilder(caller: MutableMethod, insta
 
     builder.apply {
         val store = instructions.indexOfFirst { it.opcode == Opcode.SPUT_OBJECT && it.fieldReference() == client }
-        val build = instructions.subList(0, store).indexOfLast { instruction ->
-            instruction is ReferenceInstruction && (instruction.reference as? MethodReference)?.let {
-                it.definingClass == OKHTTP_CLIENT_BUILDER && it.name == "build"
-            } == true
-        }
-        if (build < 0) throw PatchException("OkHttpHelper.$name: no builder.build() before $client is set")
-        val register = when (val call = instructions[build]) {
-            is FiveRegisterInstruction -> call.registerC
-            is RegisterRangeInstruction -> call.startRegister
-            else -> throw PatchException("Unexpected build() call: ${call.opcode}")
-        }
-        replaceInstruction(
-            build,
-            "invoke-static/range { v$register .. v$register }, $installHook($OKHTTP_CLIENT_BUILDER)$OKHTTP_CLIENT",
+        val register = (instructions[store] as OneRegisterInstruction).registerA
+        addInstructions(
+            store,
+            """
+                invoke-static/range { v$register .. v$register }, $installHook($OKHTTP_CLIENT)$OKHTTP_CLIENT
+                move-result-object v$register
+            """,
         )
     }
 }

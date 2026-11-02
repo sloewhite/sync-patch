@@ -48,9 +48,9 @@ public final class FixRedgifsApiPatch implements Interceptor {
     private FixRedgifsApiPatch() {
     }
 
-    /** Replaces OkHttpClient.Builder.build() for the client behind Sync's Volley requests. */
-    public static OkHttpClient install(OkHttpClient.Builder builder) {
-        return builder.addInterceptor(INSTANCE).build();
+    /** Wraps the client behind Sync's Volley requests, however it was built, just before it is stored. */
+    public static OkHttpClient install(OkHttpClient client) {
+        return client.newBuilder().addInterceptor(INSTANCE).build();
     }
 
     /** Sync's own user agent. Filled in by the patch. */
