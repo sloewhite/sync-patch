@@ -1,0 +1,72 @@
+name: Build and test patches
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      # Reading the ReVanced registry needs a token with read:packages. If the default token is refused, create
+      # a classic PAT with only read:packages and store it as the repository secret GPR_TOKEN.
+      GITHUB_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
+      IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set imgur Client-ID (secret IMGUR_CLIENT_ID)
+        if: env.IMGUR_CLIENT_ID != ''
+        run: sed -i "s/private const val IMGUR_CLIENT_ID = \"\"/private const val IMGUR_CLIENT_ID = \"${IMGUR_CLIENT_ID}\"/" patches/src/main/kotlin/app/revanced/patches/syncfixes/imgur/FixImgurPatch.kt
+
+      - name: Build bundle
+        run: |
+          chmod +x gradlew
+          ./gradlew buildAndroid --stacktrace
+          ls -l patches/build/libs
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: patches
+          path: patches/build/libs/*.rvp
+
+      # ---- Test: apply the patches to the real APK ----
+      - name: Download Sync APK (v23.06.30-13:39, arm64-v8a)
+        run: |
+          curl -fL --retry 3 -o sync.apk "https://archive.org/download/com.laurencedawson.reddit_sync/com.laurencedawson.reddit_sync.apk"
+          echo "c62613bd95345ff23930deb88f34f4dcc1bd89d0  sync.apk" | sha1sum -c -
+
+      - name: Download ReVanced CLI
+        run: |
+          gh release download --repo ReVanced/revanced-cli --pattern '*-all.jar' --output revanced-cli.jar
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: List patches
+        run: java -jar revanced-cli.jar list-patches --with-packages --with-versions patches/build/libs/*.rvp | tee list.txt
+
+      - name: Apply patches
+        run: |
+          DISABLE=""
+          if [ -z "$IMGUR_CLIENT_ID" ]; then DISABLE='-d "Fix imgur thumbnails"'; fi
+          eval java -jar revanced-cli.jar patch -p patches/build/libs/*.rvp $DISABLE -o sync-patched.apk sync.apk 2>&1 | tee patch.log
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: patch-results
+          path: |
+            patch.log
+            list.txt
+            sync-patched.apk

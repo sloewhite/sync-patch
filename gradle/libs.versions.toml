@@ -1,0 +1,13 @@
+[versions]
+revanced-patcher = "22.0.0"
+# Tracking https://github.com/google/smali/issues/64.
+#noinspection GradleDependency
+smali = "3.0.5"
+# The OkHttp version Sync for Reddit ships; the extension compiles against it and links to the app's copy.
+okhttp = "5.0.0-alpha.8"
+
+[libraries]
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+
+[plugins]
+android-library = { id = "com.android.library" }
