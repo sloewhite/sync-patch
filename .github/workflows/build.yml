@@ -19,7 +19,6 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
       ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ github.actor }}
       ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
-      IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,9 +27,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Set imgur Client-ID (secret IMGUR_CLIENT_ID)
-        if: env.IMGUR_CLIENT_ID != ''
-        run: sed -i "s/private const val IMGUR_CLIENT_ID = \"\"/private const val IMGUR_CLIENT_ID = \"${IMGUR_CLIENT_ID}\"/" patches/src/main/kotlin/app/revanced/patches/syncfixes/imgur/FixImgurPatch.kt
 
       - name: Build bundle
         run: |
@@ -62,10 +58,8 @@ jobs:
       - name: Apply patches
         shell: bash
         run: |
-          ARGS=()
-          if [ -z "$IMGUR_CLIENT_ID" ]; then ARGS+=(-d "Fix imgur thumbnails"); fi
           # -b: our .rvp is unsigned, so the CLI's signature/provenance check has to be bypassed.
-          java -jar revanced-cli.jar patch -p patches/build/libs/*.rvp -b "${ARGS[@]}" -o sync-patched.apk sync.apk 2>&1 | tee patch.log
+          java -jar revanced-cli.jar patch -p patches/build/libs/*.rvp -b -o sync-patched.apk sync.apk 2>&1 | tee patch.log
           test -f sync-patched.apk
 
       - uses: actions/upload-artifact@v4
