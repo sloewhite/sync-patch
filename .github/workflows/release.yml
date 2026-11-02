@@ -13,6 +13,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
+      GITHUB_ACTOR: ${{ github.actor }}
+      GITHUB_TOKEN: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
       ORG_GRADLE_PROJECT_githubPackagesUsername: ${{ github.actor }}
       ORG_GRADLE_PROJECT_githubPackagesPassword: ${{ secrets.GPR_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
