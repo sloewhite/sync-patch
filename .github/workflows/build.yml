@@ -55,14 +55,6 @@ jobs:
         shell: bash
         run: java -jar revanced-cli.jar list-patches --packages --versions --options -b -p patches/build/libs/*.rvp 2>&1 | tee list.txt || true
 
-      - name: List official ReVanced patches (v6.2.1) for Sync
-        shell: bash
-        run: |
-          gh release download v6.2.1 --repo ReVanced/revanced-patches --pattern '*.rvp' --output official.rvp
-          java -jar revanced-cli.jar list-patches --packages --versions --options -b -p official.rvp --filter-package-name com.laurencedawson.reddit_sync 2>&1 | tee list-official.txt || true
-        env:
-          GH_TOKEN: ${{ github.token }}
-
       - name: Apply patches
         shell: bash
         run: |
@@ -77,5 +69,4 @@ jobs:
           path: |
             patch.log
             list.txt
-            list-official.txt
             sync-patched.apk
