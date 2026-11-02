@@ -43,17 +43,17 @@ public final class FixLoadMoreCommentsPatch {
     }
 
     /** Hooked into CommentsPresenterImpl's "load more" handler with the "more" row. */
-    public static void setMoreItem(Object item) {
+    private static void setMoreItemImpl(Object item) {
         MORE_ITEM.set(item);
     }
 
     /** Hooked into OAuthCommentsMoreRequest's constructor: link id, comma separated child ids, sort. */
-    public static void setMoreArgs(String linkId, String children, String sort) {
+    private static void setMoreArgsImpl(String linkId, String children, String sort) {
         MORE_ARGS.set(new String[]{linkId, children, sort});
     }
 
     /** Replaces the URL passed to the request's super constructor. */
-    public static String moreUrl(String url) {
+    private static String moreUrlImpl(String url) {
         if (url == null) {
             return null;
         }
@@ -90,12 +90,12 @@ public final class FixLoadMoreCommentsPatch {
     }
 
     /** Replaces the HTTP method passed to the super constructor: rewritten requests are GETs. */
-    public static int moreMethod(int method, String url) {
+    private static int moreMethodImpl(int method, String url) {
         return url != null && url.contains(MARK) ? VOLLEY_GET : method;
     }
 
     /** Hooked into OAuthCommentsMoreRequest.parseNetworkResponse(). */
-    public static NetworkResponse moreResponse(String url, NetworkResponse response) {
+    private static NetworkResponse moreResponseImpl(String url, NetworkResponse response) {
         if (url == null || !url.contains(MARK) || response == null || response.data == null) {
             return response;
         }
@@ -242,5 +242,50 @@ public final class FixLoadMoreCommentsPatch {
     private static String param(String url, String name) {
         Matcher m = Pattern.compile("[?&]" + name + "=([^&]*)").matcher(url);
         return m.find() ? m.group(1) : "";
+    }
+
+    // The public hooks below never throw: on any error Sync carries on with its own behaviour.
+
+    public static void setMoreItem(Object item) {
+        try {
+            setMoreItemImpl(item);
+        } catch (Throwable t) {
+            Log.e(Responses.TAG, "setMoreItem failed", t);
+        }
+    }
+
+    public static void setMoreArgs(String linkId, String children, String sort) {
+        try {
+            setMoreArgsImpl(linkId, children, sort);
+        } catch (Throwable t) {
+            Log.e(Responses.TAG, "setMoreArgs failed", t);
+        }
+    }
+
+    public static String moreUrl(String url) {
+        try {
+            return moreUrlImpl(url);
+        } catch (Throwable t) {
+            Log.e(Responses.TAG, "moreUrl failed", t);
+            return url;
+        }
+    }
+
+    public static int moreMethod(int method, String url) {
+        try {
+            return moreMethodImpl(method, url);
+        } catch (Throwable t) {
+            Log.e(Responses.TAG, "moreMethod failed", t);
+            return method;
+        }
+    }
+
+    public static NetworkResponse moreResponse(String url, NetworkResponse response) {
+        try {
+            return moreResponseImpl(url, response);
+        } catch (Throwable t) {
+            Log.e(Responses.TAG, "moreResponse failed", t);
+            return response;
+        }
     }
 }

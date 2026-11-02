@@ -25,7 +25,7 @@ public final class FixGalleriesPatch {
     }
 
     /** Hooked into OAuthGalleryRequest's URL builder, which is also its Volley cache key. */
-    public static String galleryUrl(String url) {
+    private static String galleryUrlImpl(String url) {
         if (url == null) {
             return null;
         }
@@ -37,7 +37,7 @@ public final class FixGalleriesPatch {
     }
 
     /** Hooked into OAuthGalleryRequest.parseNetworkResponse(). */
-    public static NetworkResponse galleryResponse(NetworkResponse response) {
+    private static NetworkResponse galleryResponseImpl(NetworkResponse response) {
         if (response == null || response.data == null) {
             return response;
         }
@@ -49,6 +49,26 @@ public final class FixGalleriesPatch {
             return Responses.withBody(response, new JSONArray(body).getJSONObject(0).toString());
         } catch (JSONException e) {
             Log.w(Responses.TAG, "Could not convert gallery response", e);
+            return response;
+        }
+    }
+
+    /** Hooked into OAuthGalleryRequest's URL builder. Never throws: on any error the original URL is used. */
+    public static String galleryUrl(String url) {
+        try {
+            return galleryUrlImpl(url);
+        } catch (Throwable t) {
+            Log.e(Responses.TAG, "galleryUrl failed", t);
+            return url;
+        }
+    }
+
+    /** Hooked into OAuthGalleryRequest.parseNetworkResponse(). Never throws. */
+    public static NetworkResponse galleryResponse(NetworkResponse response) {
+        try {
+            return galleryResponseImpl(response);
+        } catch (Throwable t) {
+            Log.e(Responses.TAG, "galleryResponse failed", t);
             return response;
         }
     }
